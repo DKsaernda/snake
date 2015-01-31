@@ -11,6 +11,9 @@ import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
 
+import net.dksaernda.snake.graphics.Screen;
+import net.dksaernda.snake.graphics.SpriteSheet;
+
 public class Game extends Canvas implements Runnable {
 	
 	private static final long serialVersionUID = 1L;
@@ -28,6 +31,9 @@ public class Game extends Canvas implements Runnable {
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private int[] pixel = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	
+	private Screen screen;
+	public Inputhandler input;	
 			
 	public Game(){
 		setMinimumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
@@ -45,6 +51,11 @@ public class Game extends Canvas implements Runnable {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+	}
+	
+	public void init() {
+		screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("tex1.png"));
+		input = new Inputhandler(this);
 	}
 	
 	public synchronized void start() {
@@ -66,6 +77,8 @@ public class Game extends Canvas implements Runnable {
 		
 		long lastTimer = System.currentTimeMillis();
 		double delta = 0;
+		
+		init();
 		
 		while (running) {
 			long now = System.nanoTime();
@@ -108,9 +121,14 @@ public class Game extends Canvas implements Runnable {
 	public void tick() {
 		tickCount++;
 		
-		for (int i = 0; i < pixel.length; i++){
+		if (input.up.isPressed()) {screen.yOffset--;}
+		if (input.down.isPressed()) {screen.yOffset++;}
+		if (input.left.isPressed()) {screen.xOffset--;}
+		if (input.right.isPressed()) {screen.xOffset++;}
+		
+		/*		for (int i = 0; i < pixel.length; i++){
 			pixel[i] = i + tickCount;
-			}
+			}*/
 	}
 	
 	public void render() {
@@ -119,6 +137,8 @@ public class Game extends Canvas implements Runnable {
 		createBufferStrategy(3);
 		return;
 		}
+		
+		screen.render(pixel, 0, WIDTH);
 
 		Graphics g = bs.getDrawGraphics();
 
